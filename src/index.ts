@@ -8,7 +8,6 @@ const app = express();
 
 app
   .use(express.json())
-  .use("/", indexRouter)
   .use("/user", userRouter)
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
