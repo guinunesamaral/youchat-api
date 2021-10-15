@@ -5,7 +5,7 @@ const router = express.Router();
 const database: Database = Database.getInstance();
 
 // get all users
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (_, res: Response) => {
   const sql = `SELECT * FROM user`;
 
   database.connection.query(sql, (err, result) => {
