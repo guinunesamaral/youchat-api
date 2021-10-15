@@ -9,7 +9,7 @@ const app = express();
 app
   .use(express.json())
   .get("/", indexRouter.defaultRoute)
-  .get("/favicon.PNG", indexRouter.faviconRoute)
+  .get("/favicon.ico", indexRouter.faviconRoute)
   .use("/user", userRouter)
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
