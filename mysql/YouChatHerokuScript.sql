@@ -1,0 +1,77 @@
+-- -----------------------------------------------------
+-- Table `User`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `User` (
+  `id` VARCHAR(36) NOT NULL,
+  `name` VARCHAR(80) NOT NULL,
+  `email` LONGTEXT NOT NULL,
+  `photo` MEDIUMBLOB NULL,
+  `contact_user_id` VARCHAR(36) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_User_User1_idx` (`contact_user_id` ASC) ,
+  CONSTRAINT `fk_User_User1`
+    FOREIGN KEY (`contact_user_id`)
+    REFERENCES `User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Chat`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Chat` (
+  `id` VARCHAR(36) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Message`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Message` (
+  `id` VARCHAR(36) NOT NULL,
+  `text` LONGTEXT NULL,
+  `image` MEDIUMBLOB NULL,
+  `isStarry` TINYINT NOT NULL,
+  `wasReceived` TINYINT NOT NULL,
+  `dispatchTimestamp` DATETIME NOT NULL,
+  `lastEditionTimestamp` DATETIME NULL,
+  `author_id` VARCHAR(36) NOT NULL,
+  `chat_id` VARCHAR(36) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_Message_User1_idx` (`author_id` ASC),
+  INDEX `fk_Message_Chat1_idx` (`chat_id` ASC),
+  CONSTRAINT `fk_Message_User1`
+    FOREIGN KEY (`author_id`)
+    REFERENCES `User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Message_Chat1`
+    FOREIGN KEY (`chat_id`)
+    REFERENCES `Chat` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `ChatUser`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ChatUser` (
+  `Chat_id` VARCHAR(36) NOT NULL,
+  `User_id` VARCHAR(36) NOT NULL,
+  PRIMARY KEY (`Chat_id`, `User_id`),
+  INDEX `fk_Chat_has_User_User1_idx` (`User_id` ASC),
+  INDEX `fk_Chat_has_User_Chat1_idx` (`Chat_id` ASC),
+  CONSTRAINT `fk_Chat_has_User_Chat1`
+    FOREIGN KEY (`Chat_id`)
+    REFERENCES `Chat` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Chat_has_User_User1`
+    FOREIGN KEY (`User_id`)
+    REFERENCES `User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
