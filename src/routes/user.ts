@@ -36,6 +36,15 @@ router.put("/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.patch("/:id", async (req: Request, res: Response) => {
+  const sql = `UPDATE user SET (name, email, ) WHERE id LIKE '${req.params.id}'`;
+
+  database.connection.query(sql, (err, result) => {
+    if (err) res.status(204).send(err);
+    res.status(200).send(result);
+  });
+});
+
 // delete user
 router.delete("/:id", async (req: Request, res: Response) => {
   const sql = `DELETE FROM user WHERE id LIKE '${req.params.id}'`;
