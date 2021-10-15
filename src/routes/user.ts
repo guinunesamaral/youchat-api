@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import Connection from "mysql2/typings/mysql/lib/Connection";
-import { nextTick } from "process";
 import Database from "../shared/Database";
 
 const router = express.Router();

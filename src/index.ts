@@ -1,4 +1,5 @@
 import express, { Response } from "express";
+import indexRouter from "./routes/index";
 import userRouter from "./routes/user";
 import chatRouter from "./routes/chat";
 import messageRouter from "./routes/message";
@@ -7,7 +8,7 @@ const app = express();
 
 app
   .use(express.json())
-  .get("/", (_, res: Response) => res.status(200).send("success"))
+  .use("/", indexRouter)
   .use("/user", userRouter)
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
