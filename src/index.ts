@@ -11,4 +11,6 @@ app
   .use("/user", userRouter)
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
+  .get("/", indexRouter.defaultRoute)
+  .get("/favicon.ico", indexRouter.faviconRoute)
   .listen(process.env.PORT || 8000, () => console.log("listening"));
