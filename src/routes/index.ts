@@ -7,4 +7,8 @@ router.get("/", (_, res: Response) => {
   res.status(200).sendFile("files/index.html", { root: "." });
 });
 
+router.get("/favicon.PNG", (_, res: Response) => {
+  res.status(200).sendFile("files/favicon.PNG", { root: "." });
+});
+
 export default router;
