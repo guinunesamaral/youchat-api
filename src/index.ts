@@ -1,5 +1,5 @@
 import express, { Response } from "express";
-import indexRouter from "./routes/index";
+import indexRouter from "./routes/default";
 import userRouter from "./routes/user";
 import chatRouter from "./routes/chat";
 import messageRouter from "./routes/message";
@@ -8,8 +8,6 @@ const app = express();
 
 app
   .use(express.json())
-  .get("/", indexRouter.defaultRoute)
-  .get("/favicon.ico", indexRouter.faviconRoute)
   .use("/user", userRouter)
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
