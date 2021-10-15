@@ -5,7 +5,7 @@ const router = express.Router();
 const database: Database = Database.getInstance();
 
 // get all users
-router.get("/", async (_, res: Response) => {
+router.get("/", (_, res: Response) => {
   const sql = `SELECT * FROM user`;
 
   database.connection.query(sql, (err, result) => {
@@ -15,7 +15,7 @@ router.get("/", async (_, res: Response) => {
 });
 
 // get user
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", (req: Request, res: Response) => {
   const sql = `SELECT * FROM user WHERE id LIKE '${req.params.id}'`;
 
   database.connection.query(sql, (err, result) => {
@@ -25,7 +25,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // create user
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", (req: Request, res: Response) => {
   if (req.params.id === req.body.id) {
     const sql = `INSERT INTO user (id, name, email) VALUES ('${req.body.id}', '${req.body.name}', '${req.body.email}')`;
 
@@ -36,7 +36,7 @@ router.put("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", (req: Request, res: Response) => {
   const sql = `UPDATE user SET (name, email, ) WHERE id LIKE '${req.params.id}'`;
 
   database.connection.query(sql, (err, result) => {
@@ -46,7 +46,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
 });
 
 // delete user
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", (req: Request, res: Response) => {
   const sql = `DELETE FROM user WHERE id LIKE '${req.params.id}'`;
 
   database.connection.query(sql, (err, result) => {
