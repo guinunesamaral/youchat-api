@@ -1,14 +1,11 @@
-import express, { Response } from "express";
-import path from "path";
+import { Request, Response } from "express";
 
-const router = express.Router();
-
-router.get("/", (_, res: Response) => {
+const defaultRoute = (req: Request, res: Response) => {
   res.status(200).sendFile("files/index.html", { root: "." });
-});
+};
 
-router.get("/favicon.PNG", (_, res: Response) => {
+const faviconRoute = (req: Request, res: Response) => {
   res.status(200).sendFile("files/favicon.PNG", { root: "." });
-});
+};
 
-export default router;
+export default { defaultRoute, faviconRoute };
