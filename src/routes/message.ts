@@ -1,11 +1,15 @@
-import express, { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
-import Database from "../shared/Database";
+import express from "express";
+import messageController from "../controllers/message";
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
-  res.status(200).send("message");
-});
+router
+  .get("/", messageController.getAll)
+  .get("/:id", messageController.getById)
+  .put("/:id", messageController.create)
+  .patch("/:id", messageController.update)
+  .patch("/:id/text", messageController.updateText)
+  .patch("/:id/timestamp", messageController.updateLastEditionTimestamp)
+  .delete("/:id", messageController.exclude);
 
 export default router;

@@ -1,6 +1,7 @@
 import mysql from "mysql2";
 import Connection from "mysql2/typings/mysql/lib/Connection";
 import dotenv from "dotenv";
+import { Response } from "express";
 
 export default class Database {
   private static instance: Database;
@@ -28,5 +29,15 @@ export default class Database {
       console.log("Connected to db");
     });
     return connection;
+  }
+
+  public async query(res: Response, query: string, errNumber: number) {
+    const connection: Connection =
+      await Database.getInstance().makeConnection();
+
+    connection.query(query, (err, results) => {
+      if (err) res.status(errNumber).send(err);
+      res.send(results);
+    });
   }
 }

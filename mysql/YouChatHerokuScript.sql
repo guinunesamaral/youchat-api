@@ -6,11 +6,26 @@ CREATE TABLE IF NOT EXISTS `User` (
   `name` VARCHAR(80) NOT NULL,
   `email` LONGTEXT NOT NULL,
   `photo` MEDIUMBLOB NULL,
-  `contact_user_id` VARCHAR(36) NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_User_User1_idx` (`contact_user_id` ASC) ,
-  CONSTRAINT `fk_User_User1`
-    FOREIGN KEY (`contact_user_id`)
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Contact`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Contact` (
+  `user_id1` VARCHAR(36) NOT NULL,
+  `user_id2` VARCHAR(36) NOT NULL,
+  PRIMARY KEY (`user_id1`, `user_id2`),
+  INDEX `fk_User_has_User_User2_idx` (`user_id2` ASC),
+  INDEX `fk_User_has_User_User1_idx` (`user_id1` ASC),
+  CONSTRAINT `fk_User_has_User_User1`
+    FOREIGN KEY (`user_id1`)
+    REFERENCES `User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_User_has_User_User2`
+    FOREIGN KEY (`user_id2`)
     REFERENCES `User` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
@@ -22,7 +37,15 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Chat` (
   `id` VARCHAR(36) NOT NULL,
-  PRIMARY KEY (`id`))
+  `user_id1` VARCHAR(36) NOT NULL,
+  `user_id2` VARCHAR(36) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_Chat_Contact1_idx` (`user_id1` ASC, `user_id2` ASC),
+  CONSTRAINT `fk_Chat_Contact1`
+    FOREIGN KEY (`user_id1` , `user_id2`)
+    REFERENCES `Contact` (`user_id1` , `user_id2`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -50,28 +73,6 @@ CREATE TABLE IF NOT EXISTS `Message` (
   CONSTRAINT `fk_Message_Chat1`
     FOREIGN KEY (`chat_id`)
     REFERENCES `Chat` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `ChatUser`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ChatUser` (
-  `Chat_id` VARCHAR(36) NOT NULL,
-  `User_id` VARCHAR(36) NOT NULL,
-  PRIMARY KEY (`Chat_id`, `User_id`),
-  INDEX `fk_Chat_has_User_User1_idx` (`User_id` ASC),
-  INDEX `fk_Chat_has_User_Chat1_idx` (`Chat_id` ASC),
-  CONSTRAINT `fk_Chat_has_User_Chat1`
-    FOREIGN KEY (`Chat_id`)
-    REFERENCES `Chat` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Chat_has_User_User1`
-    FOREIGN KEY (`User_id`)
-    REFERENCES `User` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

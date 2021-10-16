@@ -1,0 +1,37 @@
+import { Request, Response } from "express";
+import Database from "../shared/Database";
+
+const database: Database = Database.getInstance();
+
+const getAll = async (_: Request, res: Response) => {
+  const query = `SELECT * FROM chat`;
+  database.query(res, query, 204);
+};
+
+const getById = async (req: Request, res: Response) => {
+  const query = `SELECT * FROM chat WHERE id LIKE '${req.params.id}'`;
+  database.query(res, query, 204);
+};
+
+const create = async (req: Request, res: Response) => {
+  if (req.body.id === req.params.id) {
+    const query = `INSERT INTO chat (user_id1, user_id2) VALUES ('${req.body.user_id1}', '${req.body.user_id2}')`;
+    database.query(res, query, 400);
+  } else {
+    res
+      .status(400)
+      .send("the request body's id is different from the params' id");
+  }
+};
+
+const exclude = async (req: Request, res: Response) => {
+  const query = `DELETE FROM chat WHERE id LIKE '${req.params.id}'`;
+  database.query(res, query, 204);
+};
+
+export default {
+  getAll,
+  getById,
+  create,
+  exclude,
+};
