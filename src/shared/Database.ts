@@ -4,11 +4,8 @@ import dotenv from "dotenv";
 
 export default class Database {
   private static instance: Database;
-  public connection: Connection;
 
-  private constructor() {
-    this.connection = Database.makeConnection();
-  }
+  private constructor() {}
 
   public static getInstance(): Database {
     if (!Database.instance) {
@@ -17,17 +14,17 @@ export default class Database {
     return Database.instance;
   }
 
-  private static makeConnection(): Connection {
+  public async makeConnection(): Promise<Connection> {
     dotenv.config();
 
-    const connection = mysql.createConnection({
+    const connection = await mysql.createConnection({
       host: process.env.CONNECTION_HOST,
       user: process.env.CONNECTION_USER,
       password: process.env.CONNECTION_PASSWORD,
       database: process.env.CONNECTION_DATABASE,
     });
     connection.connect((err) => {
-      if (err) console.error(err);
+      if (err) console.error("error while connecting to db", err);
       console.log("Connected to db");
     });
     return connection;
