@@ -15,4 +15,4 @@ app
   .use("/contact", contactRouter)
   .get("/", indexRouter.defaultRoute)
   .get("/favicon.ico", indexRouter.faviconRoute)
-  .listen(process.env.PORT || 8000, () => console.log("listening"));
+  .listen(process.env.PORT || 9000, () => console.log("listening"));

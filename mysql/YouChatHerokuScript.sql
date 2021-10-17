@@ -4,7 +4,8 @@
 CREATE TABLE IF NOT EXISTS `User` (
   `id` VARCHAR(36) NOT NULL,
   `name` VARCHAR(80) NOT NULL,
-  `email` LONGTEXT NOT NULL,
+  `email` VARCHAR(80) NOT NULL,
+  `password` VARCHAR(70) NOT NULL,
   `photo` MEDIUMBLOB NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -54,7 +55,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Message` (
   `id` VARCHAR(36) NOT NULL,
-  `text` LONGTEXT NULL,
+  `text` MEDIUMTEXT NULL,
   `image` MEDIUMBLOB NULL,
   `isStarry` TINYINT NOT NULL,
   `wasReceived` TINYINT NOT NULL,

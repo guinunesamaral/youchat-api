@@ -1,11 +1,12 @@
-import express, { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
-import Database from "../shared/Database";
+import express from "express";
+import chatController from "../controllers/chat";
 
 const router = express.Router();
 
-router.get("/", async (req: Request, res: Response) => {
-  res.status(200).send("chat");
-});
+router
+  .get("/", chatController.getAll)
+  .get("/:id", chatController.getById)
+  .put("/:id", chatController.create)
+  .delete("/:id", chatController.exclude);
 
 export default router;

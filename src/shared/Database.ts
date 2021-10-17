@@ -15,7 +15,7 @@ export default class Database {
     return Database.instance;
   }
 
-  public async makeConnection(): Promise<Connection> {
+  private async makeConnection(): Promise<Connection> {
     dotenv.config();
 
     const connection = await mysql.createConnection({
@@ -31,7 +31,7 @@ export default class Database {
     return connection;
   }
 
-  public async query(res: Response, query: string, errNumber: number) {
+  public static async query(res: Response, query: string, errNumber: number) {
     const connection: Connection =
       await Database.getInstance().makeConnection();
 

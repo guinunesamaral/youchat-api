@@ -6,6 +6,8 @@ const router = express.Router();
 router
   .get("/", userController.getAll)
   .get("/:id", userController.getById)
+  .post("/email", userController.verifyEmail)
+  .post("/login", userController.login)
   .put("/:id", userController.create)
   .patch("/:id", userController.update)
   .patch("/:id/name", userController.updateName)
