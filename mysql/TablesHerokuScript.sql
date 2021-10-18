@@ -15,17 +15,18 @@ ENGINE = InnoDB;
 -- Table `Contact`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Contact` (
+  `id` VARCHAR(36) NOT NULL,
   `user_id1` VARCHAR(36) NOT NULL,
   `user_id2` VARCHAR(36) NOT NULL,
-  PRIMARY KEY (`user_id1`, `user_id2`),
-  INDEX `fk_User_has_User_User2_idx` (`user_id2` ASC),
-  INDEX `fk_User_has_User_User1_idx` (`user_id1` ASC),
-  CONSTRAINT `fk_User_has_User_User1`
+  INDEX `fk_Contact_User1_idx` (`user_id1` ASC),
+  INDEX `fk_Contact_User2_idx` (`user_id2` ASC),
+  PRIMARY KEY (`id`, `user_id1`, `user_id2`),
+  CONSTRAINT `fk_Contact_User1`
     FOREIGN KEY (`user_id1`)
     REFERENCES `User` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_User_has_User_User2`
+  CONSTRAINT `fk_Contact_User2`
     FOREIGN KEY (`user_id2`)
     REFERENCES `User` (`id`)
     ON DELETE NO ACTION
@@ -40,11 +41,17 @@ CREATE TABLE IF NOT EXISTS `Chat` (
   `id` VARCHAR(36) NOT NULL,
   `user_id1` VARCHAR(36) NOT NULL,
   `user_id2` VARCHAR(36) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_Chat_Contact1_idx` (`user_id1` ASC, `user_id2` ASC),
-  CONSTRAINT `fk_Chat_Contact1`
-    FOREIGN KEY (`user_id1` , `user_id2`)
-    REFERENCES `Contact` (`user_id1` , `user_id2`)
+  PRIMARY KEY (`id`, `user_id1`, `user_id2`),
+  INDEX `fk_Chat_User1_idx` (`user_id1` ASC),
+  INDEX `fk_Chat_User2_idx` (`user_id2` ASC),
+  CONSTRAINT `fk_Chat_User1`
+    FOREIGN KEY (`user_id1`)
+    REFERENCES `User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Chat_User2`
+    FOREIGN KEY (`user_id2`)
+    REFERENCES `User` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

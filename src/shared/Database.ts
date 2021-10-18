@@ -30,7 +30,11 @@ export default class Database {
     return connection;
   }
 
-  public static async query(res: Response, query: string, errNumber: number) {
+  public static async query(
+    res: Response,
+    query: string,
+    errNumber: number
+  ): Promise<void> {
     const connection: Connection =
       await Database.getInstance().makeConnection();
 
@@ -38,5 +42,11 @@ export default class Database {
       if (err) res.status(errNumber).send(err);
       res.send(results);
     });
+  }
+
+  public static async queryWithoutRes(query: string, callback: Function) {
+    const connection: Connection =
+      await Database.getInstance().makeConnection();
+    connection.query(query, callback);
   }
 }

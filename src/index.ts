@@ -1,5 +1,5 @@
 import express from "express";
-import indexRouter from "./routes/default";
+import herokuRouter from "./routes/heroku";
 import userRouter from "./routes/user";
 import chatRouter from "./routes/chat";
 import messageRouter from "./routes/message";
@@ -13,6 +13,6 @@ app
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
   .use("/contact", contactRouter)
-  .get("/", indexRouter.defaultRoute)
-  .get("/favicon.ico", indexRouter.faviconRoute)
+  .get("/", herokuRouter.defaultRoute)
+  .get("/favicon.ico", herokuRouter.faviconRoute)
   .listen(process.env.PORT || 9000, () => console.log("listening"));

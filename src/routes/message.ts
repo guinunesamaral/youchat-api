@@ -6,10 +6,10 @@ const router = express.Router();
 router
   .get("/", messageController.getAll)
   .get("/:id", messageController.getById)
-  .put("/:id", messageController.create)
-  .patch("/:id", messageController.update)
+  .put("/", messageController.create)
   .patch("/:id/text", messageController.updateText)
-  .patch("/:id/timestamp", messageController.updateLastEditionTimestamp)
+  .patch("/:id/star", messageController.star)
+  .patch("/:id/receive", messageController.receive)
   .delete("/:id", messageController.exclude);
 
 export default router;

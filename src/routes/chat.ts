@@ -6,7 +6,7 @@ const router = express.Router();
 router
   .get("/", chatController.getAll)
   .get("/:id", chatController.getById)
-  .put("/:id", chatController.create)
+  .put("/", chatController.create)
   .delete("/:id", chatController.exclude);
 
 export default router;
