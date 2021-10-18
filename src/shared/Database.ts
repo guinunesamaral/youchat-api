@@ -26,7 +26,6 @@ export default class Database {
     });
     connection.connect((err) => {
       if (err) console.error("error while connecting to db", err);
-      console.log("Connected to db");
     });
     return connection;
   }
