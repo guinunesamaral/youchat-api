@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcrypt";
 import Database from "../shared/Database";
 
 const getAll = async (_: Request, res: Response) => {
@@ -9,8 +10,12 @@ const getAll = async (_: Request, res: Response) => {
 };
 
 const getById = async (req: Request, res: Response) => {
-  const query = `SELECT * FROM user WHERE id LIKE '${req.params.id}'`;
-  await Database.query(res, query, 204);
+  if (req.params.id) {
+    const query = `SELECT * FROM user WHERE id = '${req.params.id}'`;
+    await Database.query(res, query, 204);
+  } else {
+    res.status(400).send("the request params doesn't have the user id");
+  }
 };
 
 const verifyEmail = async (req: Request, res: Response) => {
@@ -52,17 +57,23 @@ const verifyEmail = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
   if (req.body) {
-    const query = `SELECT * FROM user WHERE email = '${req.body.email}' AND password = '${req.body.password}'`;
-    await Database.query(res, query, 400);
-  } else {
-    res.status(400).send("the request has no body");
-  }
-};
-
-const fetchContacts = async (req: Request, res: Response) => {
-  if (req.body) {
-    const query = `SELECT * FROM user WHERE email = '${req.body.email}' AND password = '${req.body.password}'`;
-    await Database.query(res, query, 400);
+    let query = `SELECT password FROM user WHERE email = '${req.body.email}'`;
+    await Database.queryWithoutRes(query, async (_: any, results: any) => {
+      if (results.length === 1) {
+        const hashedPassword = results[0].password;
+        const match = bcrypt.compareSync(req.body.password, hashedPassword);
+        if (match) {
+          query = `SELECT * FROM user WHERE email = '${req.body.email}' AND password = '${hashedPassword}'`;
+          await Database.query(res, query, 400);
+        } else {
+          res
+            .status(400)
+            .send("the password provided doesn't with the database version");
+        }
+      } else {
+        res.status(400).send("there's no user with this email and password");
+      }
+    });
   } else {
     res.status(400).send("the request has no body");
   }
@@ -70,10 +81,21 @@ const fetchContacts = async (req: Request, res: Response) => {
 
 const create = async (req: Request, res: Response) => {
   if (req.body) {
-    const query = `INSERT INTO user (id, name, email, password) VALUES ('${uuidv4()}', '${
-      req.body.name
-    }', '${req.body.email}', '${req.body.password}')`;
-    await Database.query(res, query, 400);
+    let query = `SELECT * FROM user WHERE email = '${req.body.email}'`;
+    await Database.queryWithoutRes(query, async (_: any, results: any) => {
+      if (results.length !== 0) {
+        res.status(400).send("there's already a user with this email");
+      } else {
+        const saltRounds = 10;
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hash = bcrypt.hashSync(req.body.password, salt);
+        console.log(hash);
+        query = `INSERT INTO user (id, name, email, password) VALUES ('${uuidv4()}', '${
+          req.body.name
+        }', '${req.body.email}', '${hash}')`;
+        await Database.query(res, query, 400);
+      }
+    });
   } else {
     res.status(400).send("the request has no body");
   }
@@ -93,7 +115,7 @@ const updateName = async (req: Request, res: Response) => {
     const query = `UPDATE user SET name = ${req.body.name}`;
     await Database.query(res, query, 400);
   } else {
-    res.status(400).send("the request has no name in the body");
+    res.status(400).send("the request body has no name");
   }
 };
 
@@ -129,7 +151,6 @@ export default {
   getById,
   verifyEmail,
   login,
-  fetchContacts,
   create,
   updateName,
   updateEmail,

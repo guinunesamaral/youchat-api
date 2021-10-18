@@ -8,7 +8,7 @@ router
   .get("/:id", userController.getById)
   .post("/email", userController.verifyEmail)
   .post("/login", userController.login)
-  .put("/:id", userController.create)
+  .put("/", userController.create)
   .patch("/:id", userController.update)
   .patch("/:id/name", userController.updateName)
   .patch("/:id/email", userController.updateEmail)

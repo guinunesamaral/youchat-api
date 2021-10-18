@@ -8,11 +8,11 @@ const getAll = async (_: Request, res: Response) => {
 };
 
 const getById = async (req: Request, res: Response) => {
-  if (req.params.id) {
-    const query = `SELECT * FROM chat WHERE id LIKE '${req.params.id}'`;
+  if (req.params.user_id) {
+    const query = `SELECT * FROM chat WHERE user_id = '${req.params.user_id}' OR user_id2 = '${req.params.user_id}'`;
     Database.query(res, query, 204);
   } else {
-    res.status(400).send("the request params doesn't have the chat id");
+    res.status(400).send("the request params doesn't have the user id");
   }
 };
 
