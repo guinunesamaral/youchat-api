@@ -12,6 +12,7 @@ router
   .patch("/:id", userController.update)
   .patch("/:id/name", userController.updateName)
   .patch("/:id/email", userController.updateEmail)
+  .patch("/:id/password", userController.updatePassword)
   .patch("/:id/photo", userController.updatePhoto)
   .delete("/:id", userController.exclude);
 

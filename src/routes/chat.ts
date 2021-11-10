@@ -5,7 +5,7 @@ const router = express.Router();
 
 router
   .get("/", chatController.getAll)
-  .get("/:user_id", chatController.getById)
+  .get("/:user_id", chatController.getByUserId)
   .put("/", chatController.create)
   .delete("/:id", chatController.exclude);
 

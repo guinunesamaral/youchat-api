@@ -7,12 +7,21 @@ const getAll = async (_: Request, res: Response) => {
   await Database.query(res, query, 204);
 };
 
-const getById = async (req: Request, res: Response) => {
-  if (req.params.id) {
-    const query = `SELECT * FROM message WHERE id LIKE '${req.params.id}'`;
+const getByChatId = async (req: Request, res: Response) => {
+  if (req.params.chat_id) {
+    const query = `SELECT id, text, image, isStarry, wasReceived, dispatchTimestamp, lastEditionTimestamp, author_id FROM message WHERE chat_id = '${req.params.chat_id}' ORDER BY dispatchTimestamp ASC`;
     await Database.query(res, query, 204);
   } else {
-    res.status(400).send("the request params doesn't have the message id");
+    res.status(400).send("the request params doesn't have the chat id");
+  }
+};
+
+const getLastMessageByChatId = async (req: Request, res: Response) => {
+  if (req.params.chat_id) {
+    const query = `SELECT id, text, image, isStarry, wasReceived, dispatchTimestamp, lastEditionTimestamp, author_id FROM message WHERE chat_id = '${req.params.chat_id}' ORDER BY dispatchTimestamp DESC LIMIT 1`;
+    await Database.query(res, query, 204);
+  } else {
+    res.status(400).send("the request params doesn't have the chat id");
   }
 };
 
@@ -23,7 +32,6 @@ const create = async (req: Request, res: Response) => {
     }', '${req.body.image}', ${false}, ${false}, '${
       req.body.dispatchTimestamp
     }', '${req.body.author_id}', '${req.body.chat_id}')`;
-
     await Database.query(res, query, 400);
   } else {
     res.status(400).send("the request has no body");
@@ -40,7 +48,6 @@ const getTimestamp = () => {
 const updateText = async (req: Request, res: Response) => {
   if (req.body.text) {
     const timestamp = getTimestamp();
-
     const query = `UPDATE message SET text = '${req.body.text}', lastEditionTimestamp = '${timestamp}' WHERE id LIKE '${req.params.id}'`;
     await Database.query(res, query, 400);
   } else {
@@ -48,18 +55,17 @@ const updateText = async (req: Request, res: Response) => {
   }
 };
 
+// This method is responsible for star and unstar a message
 const star = async (req: Request, res: Response) => {
   if (req.params.id) {
     let query = `SELECT isStarry FROM message WHERE id = '${req.params.id}'`;
     await Database.queryWithoutRes(query, async (_: any, results: any) => {
-      const timestamp = getTimestamp();
-
       if (results[0].isStarry === 0) {
-        query = `UPDATE message SET isStarry = '${1}', lastEditionTimestamp = '${timestamp}' WHERE id = '${
+        query = `UPDATE message SET isStarry = '${1}' WHERE id = '${
           req.params.id
         }'`;
       } else {
-        query = `UPDATE message SET isStarry = '${0}', lastEditionTimestamp = '${timestamp}' WHERE id = '${
+        query = `UPDATE message SET isStarry = '${0}' WHERE id = '${
           req.params.id
         }'`;
       }
@@ -75,7 +81,6 @@ const receive = async (req: Request, res: Response) => {
     let query = `SELECT wasReceived FROM message WHERE id = '${req.params.id}'`;
     await Database.queryWithoutRes(query, async (_: any, results: any) => {
       const timestamp = getTimestamp();
-
       if (results[0].wasReceived === 0) {
         query = `UPDATE message SET wasReceived = '${1}', lastEditionTimestamp = '${timestamp}' WHERE id = '${
           req.params.id
@@ -101,7 +106,8 @@ const exclude = async (req: Request, res: Response) => {
 
 export default {
   getAll,
-  getById,
+  getByChatId,
+  getLastMessageByChatId,
   create,
   updateText,
   star,

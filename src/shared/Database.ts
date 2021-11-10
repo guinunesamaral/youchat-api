@@ -18,7 +18,7 @@ export default class Database {
   private async makeConnection(): Promise<Connection> {
     dotenv.config();
 
-    const connection = await mysql.createConnection({
+    const connection = mysql.createConnection({
       host: process.env.CONNECTION_HOST,
       user: process.env.CONNECTION_USER,
       password: process.env.CONNECTION_PASSWORD,
@@ -40,13 +40,15 @@ export default class Database {
 
     connection.query(query, (err, results) => {
       if (err) res.status(errNumber).send(err);
-      res.send(results);
+      else res.send(results);
     });
+    connection.end();
   }
 
   public static async queryWithoutRes(query: string, callback: Function) {
     const connection: Connection =
       await Database.getInstance().makeConnection();
     connection.query(query, callback);
+    connection.end();
   }
 }

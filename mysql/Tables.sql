@@ -12,29 +12,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `Contact`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Contact` (
-  `id` VARCHAR(36) NOT NULL,
-  `user_id1` VARCHAR(36) NOT NULL,
-  `user_id2` VARCHAR(36) NOT NULL,
-  INDEX `fk_Contact_User1_idx` (`user_id1` ASC),
-  INDEX `fk_Contact_User2_idx` (`user_id2` ASC),
-  PRIMARY KEY (`id`, `user_id1`, `user_id2`),
-  CONSTRAINT `fk_Contact_User1`
-    FOREIGN KEY (`user_id1`)
-    REFERENCES `User` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Contact_User2`
-    FOREIGN KEY (`user_id2`)
-    REFERENCES `User` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `Chat`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Chat` (
@@ -70,10 +47,10 @@ CREATE TABLE IF NOT EXISTS `Message` (
   `lastEditionTimestamp` DATETIME NULL,
   `author_id` VARCHAR(36) NOT NULL,
   `chat_id` VARCHAR(36) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_Message_User1_idx` (`author_id` ASC),
+  PRIMARY KEY (`id`, `author_id`, `chat_id`),
+  INDEX `fk_Message_User_idx` (`author_id` ASC),
   INDEX `fk_Message_Chat1_idx` (`chat_id` ASC),
-  CONSTRAINT `fk_Message_User1`
+  CONSTRAINT `fk_Message_User`
     FOREIGN KEY (`author_id`)
     REFERENCES `User` (`id`)
     ON DELETE NO ACTION
@@ -81,6 +58,29 @@ CREATE TABLE IF NOT EXISTS `Message` (
   CONSTRAINT `fk_Message_Chat1`
     FOREIGN KEY (`chat_id`)
     REFERENCES `Chat` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Friendship`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Friendship` (
+  `id` VARCHAR(36) NOT NULL,
+  `user_id1` VARCHAR(36) NOT NULL,
+  `user_id2` VARCHAR(36) NOT NULL,
+  PRIMARY KEY (`id`, `user_id1`, `user_id2`),
+  INDEX `fk_Friendship_User1_idx` (`user_id1` ASC),
+  INDEX `fk_Friendship_User2_idx` (`user_id2` ASC),
+  CONSTRAINT `fk_Friendship_User1`
+    FOREIGN KEY (`user_id1`)
+    REFERENCES `User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Friendship_User2`
+    FOREIGN KEY (`user_id2`)
+    REFERENCES `User` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
