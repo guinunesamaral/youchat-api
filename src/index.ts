@@ -4,11 +4,13 @@ import userRouter from "./routes/user";
 import chatRouter from "./routes/chat";
 import messageRouter from "./routes/message";
 import friendshipRouter from "./routes/friendship";
+import cors from "cors";
 
 const app = express();
 
 app
   .use(express.json())
+  .use(cors())
   .use("/user", userRouter)
   .use("/chat", chatRouter)
   .use("/message", messageRouter)
