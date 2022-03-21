@@ -17,7 +17,6 @@ export default class Database {
 
   private async makeConnection(): Promise<Connection> {
     dotenv.config();
-
     const connection = mysql.createConnection({
       host: process.env.CONNECTION_HOST,
       user: process.env.CONNECTION_USER,
@@ -25,30 +24,51 @@ export default class Database {
       database: process.env.CONNECTION_DATABASE,
     });
     connection.connect((err) => {
-      if (err) console.error("error while connecting to db", err);
+      if (err) {
+        console.error("error while connecting to db", err);
+      }
     });
     return connection;
   }
 
   public static async query(
-    res: Response,
-    query: string,
-    errNumber: number
+    sql: string,
+    errNbr: number,
+    res: Response
   ): Promise<void> {
     const connection: Connection =
       await Database.getInstance().makeConnection();
 
-    connection.query(query, (err, results) => {
-      if (err) res.status(errNumber).send(err);
+    connection.query(sql, (err, results) => {
+      if (err) res.status(errNbr).send(err);
       else res.send(results);
     });
     connection.end();
   }
 
-  public static async queryWithoutRes(query: string, callback: Function) {
+  public static async queryWithPlaceholder(
+    sql: string,
+    values: any,
+    errNbr: number,
+    res: Response
+  ): Promise<void> {
     const connection: Connection =
       await Database.getInstance().makeConnection();
-    connection.query(query, callback);
+
+    connection.query(sql, values, (err, results) => {
+      if (err) res.status(errNbr).send(err);
+      else res.send(results);
+    });
+    connection.end();
+  }
+
+  public static async queryWithCallback(
+    sql: string,
+    callback: Function
+  ): Promise<void> {
+    const connection: Connection =
+      await Database.getInstance().makeConnection();
+    connection.query(sql, callback);
     connection.end();
   }
 }
