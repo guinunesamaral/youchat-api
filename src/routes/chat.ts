@@ -1,12 +1,12 @@
 import express from "express";
-import chatController from "../controllers/chat";
+import ChatController from "../controllers/chat";
 
 const router = express.Router();
 
 router
-  .get("/", chatController.getAll)
-  .get("/:user_id", chatController.getByUserId)
-  .put("/", chatController.create)
-  .delete("/:id", chatController.exclude);
+  .get("/", ChatController.getAll)
+  .get("/:user_id", ChatController.getByUserId)
+  .put("/", ChatController.create)
+  .delete("/:id", ChatController.exclude);
 
 export default router;
