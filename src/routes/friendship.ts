@@ -1,12 +1,12 @@
 import express from "express";
-import friendshipController from "../controllers/friendship";
+import FriendshipController from "../controllers/friendship";
 
 const router = express.Router();
 
 router
-  .get("/", friendshipController.getAll)
-  .get("/:user_id", friendshipController.getFriendData)
-  .put("/", friendshipController.create)
-  .delete("/:id", friendshipController.exclude);
+  .get("/", FriendshipController.getAll)
+  .get("/:user_id", FriendshipController.getFriendData)
+  .put("/", FriendshipController.create)
+  .delete("/:id", FriendshipController.exclude);
 
 export default router;
