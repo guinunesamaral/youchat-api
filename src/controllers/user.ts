@@ -1,191 +1,212 @@
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
-import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcrypt";
 import Database from "../shared/Database";
 
-const getAll = async (_: Request, res: Response) => {
-  const query = `SELECT * FROM user`;
-  await Database.query(res, query, 204);
-};
+export default class UserController {
+  private static instance: UserController;
 
-const getById = async (req: Request, res: Response) => {
-  if (req.params.id) {
-    const query = `SELECT * FROM user WHERE id = '${req.params.id}'`;
-    await Database.query(res, query, 204);
-  } else {
-    res.status(400).send("the request params doesn't have the user id");
-  }
-};
+  private constructor() {}
 
-const verifyEmail = async (req: Request, res: Response) => {
-  const sixDigitsCode = () => {
-    let code: string = "";
-    for (let i = 0; i < 6; i++) {
-      code += Math.floor(Math.random() * 10).toString();
+  public static getInstance(): UserController {
+    if (!UserController.instance) {
+      UserController.instance = new UserController();
     }
-    return code;
-  };
-
-  if (req.body.email) {
-    const transporter = nodemailer.createTransport({
-      host: "smtp-mail.outlook.com",
-      auth: {
-        user: "youchatverify@outlook.com",
-        pass: "Bjid58XAayA2eaV",
-      },
-    });
-    transporter.sendMail(
-      {
-        from: "youchatverify@outlook.com",
-        to: `${req.body.email}`,
-        subject: "Account verification",
-        text: `Please enter this code in the app to verify your account: ${sixDigitsCode()}`,
-      },
-      (err, info) => {
-        if (err) {
-          res.send(err);
-        } else {
-          res.send(info);
-        }
-      }
-    );
-  } else {
-    res.status(400).send("the request body has no email");
+    return UserController.instance;
   }
-};
 
-const login = async (req: Request, res: Response) => {
-  if (req.body) {
-    let query = `SELECT password FROM user WHERE email = '${req.body.email}'`;
-    await Database.queryWithoutRes(query, async (_: any, results: any) => {
-      if (results && results.length === 1) {
-        const hashedPassword = results[0].password;
-        const match = bcrypt.compareSync(req.body.password, hashedPassword);
-        if (match) {
-          query = `SELECT * FROM user WHERE email = '${req.body.email}' AND password = '${hashedPassword}'`;
-          await Database.query(res, query, 400);
+  public static async getAll(_req: Request, res: Response) {
+    console.log("/");
+
+    const sql = `SELECT * FROM user`;
+    await Database.query(sql, 204, res);
+  }
+
+  public static async getById(req: Request, res: Response) {
+    console.log("/:id");
+    if (req.params.id) {
+      const sql = `SELECT * FROM user WHERE id = '${req.params.id}'`;
+      await Database.query(sql, 204, res);
+    } else {
+      res
+        .status(400)
+        .send({ error: "the request params doesn't have the user id" });
+    }
+  }
+
+  public static async getByEmail(req: Request, res: Response) {
+    console.log("/email");
+    if (req.body.email) {
+      const sql = `SELECT * FROM user WHERE email = '${req.body.email}'`;
+      await Database.query(sql, 204, res);
+    } else {
+      res
+        .status(400)
+        .send({ error: "the request params doesn't have the user's email" });
+    }
+  }
+
+  public static async login(req: Request, res: Response) {
+    console.log("/login");
+    const bcrypt = await import("bcrypt");
+
+    if (req.body.email && req.body.password) {
+      let sql = `SELECT password FROM user WHERE email = '${req.body.email}'`;
+
+      await Database.queryWithCallback(sql, async (_err: any, results: any) => {
+        if (results && results.length === 1) {
+          const hashedPassword = results[0].password;
+          const match = bcrypt.compareSync(req.body.password, hashedPassword);
+
+          if (match) {
+            sql = `SELECT * FROM user WHERE email = '${req.body.email}' AND password = '${hashedPassword}'`;
+            await Database.query(sql, 400, res);
+          } else {
+            res.status(400).send({
+              error: "the password provided doesn't match with the email",
+            });
+          }
         } else {
           res
             .status(400)
-            .send("the password provided doesn't match with the email");
+            .send({ error: "there's no user with this email and password" });
         }
-      } else {
-        res.status(400).send("there's no user with this email and password");
-      }
-    });
-  } else {
-    res.status(400).send("the request has no body");
+      });
+    } else {
+      res.status(400).send({ error: "the request has no body" });
+    }
   }
-};
 
-const create = async (req: Request, res: Response) => {
-  if (req.body) {
-    let query = `SELECT * FROM user WHERE email = '${req.body.email}'`;
-    await Database.queryWithoutRes(query, async (_: any, results: any) => {
-      if (results.length !== 0) {
-        res.status(400).send("there's already a user with this email");
-      } else {
-        const saltRounds = 10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(req.body.password, salt);
-        const userId = uuidv4();
-
-        query = `INSERT INTO user (id, name, email, password) VALUES ('${userId}', '${req.body.name}', '${req.body.email}', '${hash}')`;
-
-        await Database.queryWithoutRes(
-          `INSERT INTO friendship (id, user_id1, user_id2) VALUES ('${uuidv4()}', '${userId}', '${userId}')`,
-          () => {}
-        );
-
-        await Database.queryWithoutRes(
-          `INSERT INTO chat (id, user_id1, user_id2) VALUES ('${uuidv4()}', '${userId}', '${userId}')`,
-          () => {}
-        );
-
-        await Database.query(res, query, 400);
-      }
-    });
-  } else {
-    res.status(400).send("the request has no body");
+  public static async checkIfEmailIsAvailable(req: Request, res: Response) {
+    if (req.body.email) {
+      let sql = `SELECT * FROM user WHERE email = '${req.body.email}'`;
+      await Database.queryWithCallback(sql, async (_err: any, results: any) => {
+        if (results) {
+          res
+            .status(400)
+            .send({ error: "there's already an user with this email" });
+        }
+      });
+    } else {
+      res.status(400).send({ error: "the request body has no email" });
+    }
   }
-};
 
-const update = async (req: Request, res: Response) => {
-  if (req.body) {
-    const query = `UPDATE user SET name = '${req.body.name}', email = '${req.body.email}', photo = '${req.body.photo}' WHERE id LIKE '${req.params.id}'`;
-    await Database.query(res, query, 400);
-  } else {
-    res.status(400).send("the request has no body");
+  public static async resetPasswordSendCode(req: Request, res: Response) {
+    const { sendCodeToEmail: sendCodeToEmail } = await import(
+      "../shared/functions"
+    );
+
+    if (req.body.email) {
+      sendCodeToEmail(req.body.email, res);
+    } else {
+      res.status(400).send({ error: "the request body has no email" });
+    }
   }
-};
 
-const updateName = async (req: Request, res: Response) => {
-  if (req.body.name && req.params.id) {
-    const query = `UPDATE user SET name = '${req.body.name}' WHERE id = '${req.params.id}'`;
-    await Database.query(res, query, 400);
-  } else {
-    res.status(400).send("the request body has no name and/or user id");
+  public static async verifyEmailIfAvailable(req: Request, res: Response) {
+    const { sendCodeToEmail: sendCodeToEmail } = await import(
+      "../shared/functions"
+    );
+
+    if (req.body.email) {
+      const sql = `SELECT * FROM user WHERE email = '${req.body.email}'`;
+      await Database.queryWithCallback(sql, async (_: any, results: any) => {
+        if (results.length !== 0) {
+          res
+            .status(400)
+            .send({ error: "there's already an user with this email" });
+        } else {
+          sendCodeToEmail(req.body.email, res);
+        }
+      });
+    } else {
+      res.status(400).send({ error: "the request body has no email" });
+    }
   }
-};
 
-const updateEmail = async (req: Request, res: Response) => {
-  if (req.body.email && req.params.id) {
-    const query = `UPDATE user SET email = '${req.body.email}' WHERE id = '${req.params.id}'`;
-    await Database.query(res, query, 400);
-  } else {
-    res.status(400).send("the request body has no email and/or user id");
+  public static async create(req: Request, res: Response) {
+    const bcrypt = await import("bcrypt");
+    const { v4: uuidv4 } = await import("uuid");
+
+    if (req.body.name && req.body.email && req.body.password) {
+      const saltRounds = 10;
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+      const sql = `INSERT INTO user (id, name, email, password) VALUES ('${uuidv4()}', '${
+        req.body.name
+      }', '${req.body.email}', '${hashedPassword}')`;
+      await Database.query(sql, 400, res);
+    } else {
+      res.status(400).send({ error: "the request is missing properties" });
+    }
   }
-};
 
-// The user can't update the password using an equal password
-const updatePassword = async (req: Request, res: Response) => {
-  if (req.body.email && req.body.password) {
-    let query = `SELECT password FROM user WHERE email = '${req.body.email}'`;
-    await Database.queryWithoutRes(query, async (_: any, results: any) => {
-      const hashedPassword = results[0].password;
-      const match = bcrypt.compareSync(req.body.password, hashedPassword);
-
-      if (match) {
-        res.status(400).send("you need to pass a different password");
-      } else {
-        const query = `UPDATE user SET password = '${req.body.password}' WHERE id = '${req.params.id}'`;
-        await Database.query(res, query, 400);
-      }
-    });
-  } else {
-    res.status(400).send("the request body has no password");
+  public static async update(req: Request, res: Response) {
+    if (req.params.id && req.body.name && req.body.email && req.body.photo) {
+      const sql = `UPDATE user SET name = '${req.body.name}', email = '${req.body.email}', photo = '${req.body.photo}' WHERE id LIKE '${req.params.id}'`;
+      await Database.query(sql, 400, res);
+    } else {
+      res.status(400).send("the request has no body");
+    }
   }
-};
 
-const updatePhoto = async (req: Request, res: Response) => {
-  if (req.body.photo) {
-    const query = `UPDATE user SET photo = '${req.body.photo}'`;
-    await Database.query(res, query, 400);
-  } else {
-    res.status(400).send("the request body has no email");
+  public static async updateName(req: Request, res: Response) {
+    if (req.params.id && req.body.name) {
+      const sql = `UPDATE user SET name = '${req.body.name}' WHERE id = '${req.params.id}'`;
+      await Database.query(sql, 400, res);
+    } else {
+      res.status(400).send("the request body has no name and/or user id");
+    }
   }
-};
 
-const exclude = async (req: Request, res: Response) => {
-  if (req.params.id) {
-    const query = `DELETE FROM user WHERE id = '${req.params.id}'`;
-    await Database.query(res, query, 204);
-  } else {
-    res.status(400).send("the request params doesn't have the user id");
+  public static async updateEmail(req: Request, res: Response) {
+    if (req.params.id && req.body.email) {
+      const sql = `UPDATE user SET email = '${req.body.email}' WHERE id = '${req.params.id}'`;
+      await Database.query(sql, 400, res);
+    } else {
+      res.status(400).send("the request body has no email and/or user id");
+    }
   }
-};
 
-export default {
-  getAll,
-  getById,
-  verifyEmail,
-  login,
-  create,
-  updateName,
-  updateEmail,
-  updatePassword,
-  updatePhoto,
-  update,
-  exclude,
-};
+  public static async updatePassword(req: Request, res: Response) {
+    const bcrypt = await import("bcrypt");
+
+    // The user can't update the password using an equal password
+    if (req.params.id && req.body.email && req.body.password) {
+      let sql = `SELECT password FROM user WHERE email = '${req.body.email}'`;
+      await Database.queryWithCallback(sql, async (_: any, results: any) => {
+        const hashedPassword = results[0].password;
+        const match = bcrypt.compareSync(req.body.password, hashedPassword);
+
+        if (match) {
+          res.status(400).send("you need to pass a different password");
+        } else {
+          const sql = `UPDATE user SET password = '${req.body.password}' WHERE id = '${req.params.id}'`;
+          await Database.query(sql, 400, res);
+        }
+      });
+    } else {
+      res.status(400).send("the request body has no password");
+    }
+  }
+
+  public static async updatePhoto(req: Request, res: Response) {
+    const fs = await import("fs");
+
+    if (req.params.id && req.file && req.file?.path) {
+      const photo = fs.readFileSync(req.file.path);
+      const sql = `UPDATE user SET photo = ? WHERE id = '${req.params.id}'`;
+      await Database.queryWithPlaceholder(sql, photo, 400, res);
+    } else {
+      res.status(400).send("the request has no photo");
+    }
+  }
+
+  public static async exclude(req: Request, res: Response) {
+    if (req.params.id) {
+      const sql = `DELETE FROM user WHERE id = '${req.params.id}'`;
+      await Database.query(sql, 204, res);
+    } else {
+      res.status(400).send("the request params doesn't have the user id");
+    }
+  }
+}
