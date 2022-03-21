@@ -2,26 +2,12 @@ import { Request, Response } from "express";
 import Database from "../shared/Database";
 
 export default class UserController {
-  private static instance: UserController;
-
-  private constructor() {}
-
-  public static getInstance(): UserController {
-    if (!UserController.instance) {
-      UserController.instance = new UserController();
-    }
-    return UserController.instance;
-  }
-
   public static async getAll(_req: Request, res: Response) {
-    console.log("/");
-
     const sql = `SELECT * FROM user`;
     await Database.query(sql, 204, res);
   }
 
   public static async getById(req: Request, res: Response) {
-    console.log("/:id");
     if (req.params.id) {
       const sql = `SELECT * FROM user WHERE id = '${req.params.id}'`;
       await Database.query(sql, 204, res);
@@ -33,7 +19,6 @@ export default class UserController {
   }
 
   public static async getByEmail(req: Request, res: Response) {
-    console.log("/email");
     if (req.body.email) {
       const sql = `SELECT * FROM user WHERE email = '${req.body.email}'`;
       await Database.query(sql, 204, res);
@@ -45,7 +30,6 @@ export default class UserController {
   }
 
   public static async login(req: Request, res: Response) {
-    console.log("/login");
     const bcrypt = await import("bcrypt");
 
     if (req.body.email && req.body.password) {
